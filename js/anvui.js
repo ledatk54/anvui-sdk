@@ -1,6 +1,5 @@
 const API_TEST_BASE_URL = 'https://api-test.anvui.vn/v1'
 const API_PROD_BASE_URL = 'https://api.anvui.vn/v1'
-const WEB_BASE_URL = 'https://xeanvui.phanmemnhaxe.vn'
 
 let listPointData = []
 let listPointAliasData = []
@@ -437,7 +436,7 @@ class SearchTicket{
             }
             const loader = document.getElementById('loader');  
 
-            window.open(`${WEB_BASE_URL}${url}`, this.target)     
+            window.open(`${window.webUrl}${url}`, this.target)     
         });
 
         toggleResetSelector.on("click", (e) => {                
@@ -677,7 +676,8 @@ function initializePlugin() {
 }
 
 // Hàm init để khởi chạy plugin
-function init(companyId) {
+function init(companyId, baseUrl) {
+  window.webUrl = baseUrl;
   loadScriptsAndStyles(companyId, initializePlugin);
 }
 
