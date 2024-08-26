@@ -84,10 +84,6 @@ const getListRoute = (companyId, callback) => {
                 );
                 callback()
             }
-            console.log(data);
-            console.log('listPointData',listPointData);
-            console.log('listPointAliasData',listPointAliasData);
-            console.log('listPointsByProvinceData',listPointsByProvinceData);
             
         },
         error: function () {
@@ -125,7 +121,7 @@ function loadScriptsAndStyles(companyId, callback) {
             document.head.appendChild(linkDatePickerCss);
             var linkPluginCSS = document.createElement("link");
             linkPluginCSS.rel = "stylesheet";
-            linkPluginCSS.href = "css/anvui-search.css";
+            linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk/css/anvui-search.css";
             document.head.appendChild(linkPluginCSS);
             getListRoute(companyId, callback)
 
