@@ -59,13 +59,22 @@ const getListRoute = (companyId, callback) => {
                     item.listPoint ? item.listPoint : item.listPointCache || []
                 )
                 .flat(1);
-                const uniqueListPoints = listPointData.filter(
-                (v, i, a) =>
-                    a.findIndex((v2) => v2.id === v.id) === i
-                );
-                listPointAliasData = uniqueListPoints.map((item, index) => {
+                
+                const uniqueListPoints = [];
+                const uniqueIds = [];
+                listPointData.map((item, index) => {
+                    if (!uniqueIds.includes(item.id)) {
+                        uniqueListPoints.push({
+                            ...item,
+                            index: index
+                        });
+                        uniqueIds.push(item.id);
+                        return item;
+                    }
+                })
+                listPointAliasData = uniqueListPoints.map((item) => {
                     const itemClone = { ...item };
-                    itemClone.index = index;
+                    itemClone.index = item.index;
                     itemClone.alias = fixTitle(item.name);
                     itemClone.listRoute = [item.routeId];
                     itemClone.listRouteText = itemClone.listRoute.join(',');
@@ -291,7 +300,7 @@ class SearchTicketSDK{
         let pointDownAlias = this.listPointById[this.pointDownData]['alias']
         let pointDownIndex = this.listPointById[this.pointDownData]['index']
 
-        let url = `/dat-ve/ve-xe-tu-${pointUpAlias.trim()}-den-${pointDownAlias.trim()}-${pointUpIndex}d${pointDownIndex}.html?date=${SearchTicket.changeFormatToDateParam(this.dateData)}`
+        let url = `/dat-ve/ve-xe-tu-${pointUpAlias.trim()}-den-${pointDownAlias.trim()}-${pointUpIndex}d${pointDownIndex}.html?date=${SearchTicketSDK.changeFormatToDateParam(this.dateData)}`
         
         if(this.timeData != 0) {
             url += `&time=${this.timeData}`
