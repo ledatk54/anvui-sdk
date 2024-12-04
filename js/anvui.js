@@ -149,7 +149,7 @@ Date.prototype.getDateDDMMYYYY = function(type = 1){
     
     return `${dd}/${mm}/${yyyy}`;
 }
-class SearchTicket{
+class SearchTicketSDK{
 
     constructor(config = {}) 
     {
@@ -657,7 +657,7 @@ function initializePlugin() {
     </div>
  </section>`;
 
-    var searchTicketDestop = new SearchTicket({
+    var searchTicketSDKDestop = new SearchTicketSDK({
         wrap: '#js-SearchTicket',
         pointUpSelector: ".pointUp",
         pointDownSelector: ".pointDown",
