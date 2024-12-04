@@ -6,6 +6,10 @@ let listPointAliasData = []
 let listPointById = {}
 let listPointsByProvinceData = [];
 
+const getBaseUrl = (env) => {
+    return env === "development"? API_TEST_BASE_URL : API_PROD_BASE_URL;
+}
+
 const fixTitle = (title, strtolower = true) => {
     let str = title.toLowerCase();
     // xóa dấu
@@ -32,14 +36,14 @@ const listify = (obj, mapFn) =>
 }, []);
 
 const getListRoute = (companyId, callback) => {
-    console.log("callback",callback)
+    const baseUrl = getBaseUrl(window.config?.env || 'development');
     const params = {
         page: 0,
         count: 500,
         companyId: companyId,
         platform: 2
     }
-    const url = `${API_TEST_BASE_URL}/route/getList`;
+    const url = `${baseUrl}/route/getList`;
     $.ajax({
         method: "POST",
         url: url,
@@ -520,7 +524,7 @@ class SearchTicket{
     }
 }
 function initializePlugin() {
-  var searchPluginContainer = document.getElementById("anvui-root");
+  var searchPluginContainer = document.getElementById(window.config.domId);
   const pointUpSelect = ['<option value="">Chọn điểm đi</option>']
   const pointDownSelect = ['<option value="">Chọn điểm đến</option>']
   listPointsByProvinceData.map((item) => {
@@ -676,9 +680,10 @@ function initializePlugin() {
 }
 
 // Hàm init để khởi chạy plugin
-function init(companyId, baseUrl) {
-  window.webUrl = baseUrl;
-  loadScriptsAndStyles(companyId, initializePlugin);
+function init(config) {
+  window.webUrl = config.url;
+  window.config = config;
+  loadScriptsAndStyles(config.companyId, initializePlugin);
 }
 
 // Export hàm init
