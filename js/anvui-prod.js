@@ -153,6 +153,7 @@ function loadScriptsAndStyles(companyId, callback, config) {
             loadSelect2AndDependencies(companyId, callback, config);
         };
         document.head.appendChild(scriptJQuery);
+        console.log('loadScriptsAndStyles')
     } else {
         loadSelect2AndDependencies(companyId, callback, config);
     }
@@ -176,6 +177,19 @@ function loadScriptsAndStyles(companyId, callback, config) {
       loadDatepickerAndDependencies(companyId, callback, config);
     }
   }
+  function loadLunarDatepicker(companyId, callback) {
+    const scriptMoment = document.createElement("script");
+    scriptMoment.src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js";
+    scriptMoment.onload = function () {
+      const scriptLunar = document.createElement("script");
+      scriptLunar.src = "https://cdn.jsdelivr.net/npm/moment-lunar@0.0.4/moment-lunar.min.js";
+        scriptLunar.onload = function () {
+            loadCustomStylesAndExecute(companyId, callback);
+        }
+      document.head.appendChild(scriptLunar);
+    };
+    document.head.appendChild(scriptMoment);
+  }
   
   function loadDatepickerAndDependencies(companyId, callback, config) {
     // Kiểm tra và tải Datepicker nếu cấu hình cho phép
@@ -189,7 +203,7 @@ function loadScriptsAndStyles(companyId, callback, config) {
         linkDatePickerCss.href =
           "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
         document.head.appendChild(linkDatePickerCss);
-        loadCustomStylesAndExecute(companyId, callback);
+        loadLunarDatepicker(companyId, callback);
       };
       document.head.appendChild(scriptDatePicker);
     } else {
@@ -392,6 +406,17 @@ class SearchTicketSDK{
             todayHighlight:true,
             orientation: 'bottom',
             autoclose: true,
+            beforeShowDay: function (date) {
+                console.log('ádfasdf')
+                const lunarDate = moment(date).lunar().format("DD/MM/YYYY");
+                return {
+                  tooltip: `Âm lịch: ${lunarDate}`,
+                  classes: "cell",
+                  content: `<div>${date.getDate()}</div><small 
+                  style="color: #888; font-size: 9px; position: absolute; bottom: 2px; right: 2px;"
+                  >${lunarDate.split('/')[0]}</small>`,
+                };
+            },
         });
 
         $(`${this.wrap} ${this.dateSelector}`).datepicker('setDate', today);
@@ -762,6 +787,7 @@ function init(config) {
   window.webUrl = config.url;
   window.config = config;
   loadScriptsAndStyles(config.companyId, initializePlugin, config);
+  
 }
 
 // Export hàm init

@@ -770,12 +770,13 @@ button, input, optgroup, select, textarea {
 }
 .datepicker td, .datepicker th {
     text-align: center;
-    width: 20px;
-    height: 20px;
+    width: 36px;
+    height: 36px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
     border: none;
+    position: relative;
 }
 .datepicker .next.disabled, .datepicker .prev.disabled {
     visibility: hidden;
