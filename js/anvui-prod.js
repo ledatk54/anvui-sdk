@@ -221,7 +221,7 @@ function loadScriptsAndStyles(companyId, callback, config) {
   
     var linkPluginCSS = document.createElement("link");
     linkPluginCSS.rel = "stylesheet";
-    linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk/css/anvui-search.css";
+    linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk@v1.6/css/anvui-search.css";
     document.head.appendChild(linkPluginCSS);
   
     // Gọi hàm callback sau khi các tài nguyên được tải
