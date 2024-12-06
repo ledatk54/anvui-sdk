@@ -104,47 +104,116 @@ const getListRoute = (companyId, callback) => {
       });
 }
 
-function loadScriptsAndStyles(companyId, callback) {
-  // Tải jQuery
-  var scriptJQuery = document.createElement("script");
-  scriptJQuery.src = "https://code.jquery.com/jquery-3.6.0.min.js";
-  scriptJQuery.onload = function () {
-    // Tải Select2 sau khi jQuery đã tải xong
-    var scriptSelect2 = document.createElement("script");
-    scriptSelect2.src =
-      "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
-    scriptSelect2.onload = function () {
-        // Tải CSS cho Select2
+// function loadScriptsAndStyles(companyId, callback) {
+//   // Tải jQuery
+//   var scriptJQuery = document.createElement("script");
+//   scriptJQuery.src = "https://code.jquery.com/jquery-3.6.0.min.js";
+//   scriptJQuery.onload = function () {
+//     // Tải Select2 sau khi jQuery đã tải xong
+//     var scriptSelect2 = document.createElement("script");
+//     scriptSelect2.src =
+//       "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
+//     scriptSelect2.onload = function () {
+//         // Tải CSS cho Select2
+//         var linkSelect2CSS = document.createElement("link");
+//         linkSelect2CSS.rel = "stylesheet";
+//         linkSelect2CSS.href ="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css";
+//         var linkFontCSS = document.createElement("link");
+//         linkFontCSS.rel = "stylesheet";
+//         linkFontCSS.href ="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap&subset=vietnamese";
+//         var scriptDatePicker = document.createElement("script");
+//         scriptDatePicker.src =
+//         "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js";
+//         scriptDatePicker.onload = function () { 
+//             var linkDatePickerCss = document.createElement("link");
+//             linkDatePickerCss.rel = "stylesheet";
+//             linkDatePickerCss.href = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
+//             document.head.appendChild(linkSelect2CSS);
+//             document.head.appendChild(linkFontCSS);
+//             document.head.appendChild(linkDatePickerCss);
+//             var linkPluginCSS = document.createElement("link");
+//             linkPluginCSS.rel = "stylesheet";
+//             linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk/css/anvui-search.css";
+//             document.head.appendChild(linkPluginCSS);
+//             getListRoute(companyId, callback)
+
+//         }
+//         document.head.appendChild(scriptDatePicker);
+        
+//     };
+//     document.head.appendChild(scriptSelect2);
+//   };
+//   document.head.appendChild(scriptJQuery);
+// }
+function loadScriptsAndStyles(companyId, callback, config) {
+    if (config.useJQuery) {
+        var scriptJQuery = document.createElement("script");
+        scriptJQuery.src = "https://code.jquery.com/jquery-3.6.0.min.js";
+        scriptJQuery.onload = function () {
+            loadSelect2AndDependencies(companyId, callback, config);
+        };
+        document.head.appendChild(scriptJQuery);
+    } else {
+        loadSelect2AndDependencies(companyId, callback, config);
+    }
+}
+  
+  function loadSelect2AndDependencies(companyId, callback, config) {
+    if (config.useSelect2) {
+      var scriptSelect2 = document.createElement("script");
+      scriptSelect2.src =
+        "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
+      scriptSelect2.onload = function () {
         var linkSelect2CSS = document.createElement("link");
         linkSelect2CSS.rel = "stylesheet";
-        linkSelect2CSS.href ="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css";
-        var linkFontCSS = document.createElement("link");
-        linkFontCSS.rel = "stylesheet";
-        linkFontCSS.href ="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap&subset=vietnamese";
-        var scriptDatePicker = document.createElement("script");
-        scriptDatePicker.src =
+        linkSelect2CSS.href =
+          "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css";
+        document.head.appendChild(linkSelect2CSS);
+        loadDatepickerAndDependencies(companyId, callback, config);
+      };
+      document.head.appendChild(scriptSelect2);
+    } else {
+      loadDatepickerAndDependencies(companyId, callback, config);
+    }
+  }
+  
+  function loadDatepickerAndDependencies(companyId, callback, config) {
+    // Kiểm tra và tải Datepicker nếu cấu hình cho phép
+    if (config.useDatepicker) {
+      var scriptDatePicker = document.createElement("script");
+      scriptDatePicker.src =
         "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js";
-        scriptDatePicker.onload = function () { 
-            var linkDatePickerCss = document.createElement("link");
-            linkDatePickerCss.rel = "stylesheet";
-            linkDatePickerCss.href = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
-            document.head.appendChild(linkSelect2CSS);
-            document.head.appendChild(linkFontCSS);
-            document.head.appendChild(linkDatePickerCss);
-            var linkPluginCSS = document.createElement("link");
-            linkPluginCSS.rel = "stylesheet";
-            linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk/css/anvui-search.css";
-            document.head.appendChild(linkPluginCSS);
-            getListRoute(companyId, callback)
+      scriptDatePicker.onload = function () {
+        var linkDatePickerCss = document.createElement("link");
+        linkDatePickerCss.rel = "stylesheet";
+        linkDatePickerCss.href =
+          "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
+        document.head.appendChild(linkDatePickerCss);
+        loadCustomStylesAndExecute(companyId, callback);
+      };
+      document.head.appendChild(scriptDatePicker);
+    } else {
+      loadCustomStylesAndExecute(companyId, callback);
+    }
+  }
+  
+  function loadCustomStylesAndExecute(companyId, callback) {
+    // Tải các file CSS bổ sung
+    var linkFontCSS = document.createElement("link");
+    linkFontCSS.rel = "stylesheet";
+    linkFontCSS.href =
+      "https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap&subset=vietnamese";
+    document.head.appendChild(linkFontCSS);
+  
+    var linkPluginCSS = document.createElement("link");
+    linkPluginCSS.rel = "stylesheet";
+    linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk/css/anvui-search.css";
+    document.head.appendChild(linkPluginCSS);
+  
+    // Gọi hàm callback sau khi các tài nguyên được tải
+    getListRoute(companyId, callback);
+}  
 
-        }
-        document.head.appendChild(scriptDatePicker);
-        
-    };
-    document.head.appendChild(scriptSelect2);
-  };
-  document.head.appendChild(scriptJQuery);
-}
 Date.prototype.getDateDDMMYYYY = function(type = 1){
 
     var yyyy = this.getFullYear().toString();                                    
@@ -692,7 +761,7 @@ function initializePlugin() {
 function init(config) {
   window.webUrl = config.url;
   window.config = config;
-  loadScriptsAndStyles(config.companyId, initializePlugin);
+  loadScriptsAndStyles(config.companyId, initializePlugin, config);
 }
 
 // Export hàm init
