@@ -4,24 +4,32 @@
 <head>
     <meta charset="UTF-8" />
     <title>Đặt vé máy bay ưu đãi đi Nhật</title>
-    <script src="js/anvui-prod.js" defer></script>
+    <script src="https://ecosapa.com/bundle/js/jquery.min.js?v=1603424986"></script>
+    <script src="https://ecosapa.com/bundle/js/bootstrap-datepicker.min.js?v=1587962084"></script>
+    <link href="https://ecosapa.com/bundle/plugins/bootstrap/bootstrap-datepicker.min.css?v=1587963756" />
+    <script src="js/anvui.js" defer></script>
 
 
 </head>
 
 <body>
     <div id="anvui-root"></div>
+    <style>
+        :root {
+            --main-color: #f27945;
+        }
+    </style>
     <script>
          document.addEventListener('DOMContentLoaded', function() {
             // Gọi hàm init sau khi trang đã tải xong
             if (typeof window.customPluginInit === 'function') {
                 window.customPluginInit({
                     domId: "anvui-root",
-                    companyId: 'TC08Z1qHHZBxlNLt',
-                    url: 'https://xeanvui.phanmemnhaxe.vn',
-                    language: 'vi',
-                    env: 'development',
-                    useJQuery: true,
+                    companyId: 'TC0DB1s6aI4FE4mP',
+                    url: 'https://xeecosapa.nhaxe.vn',
+                    language: 'en',
+                    env: 'prod',
+                    useJQuery: false,
                     useSelect2: true,
                     useDatepicker: true,
                 });

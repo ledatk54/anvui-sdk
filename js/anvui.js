@@ -1,6 +1,39 @@
 const API_TEST_BASE_URL = 'https://api-test.anvui.vn/v1'
 const API_PROD_BASE_URL = 'https://api.anvui.vn/v1'
 
+const LABEL_CONFIG = {
+    vi: {
+        'start_point_head' : "Điểm đi",
+        'start_point' : "Chọn điểm lên",
+        'end_point_head' : "Điểm đến",
+        'end_point' : "Chọn điểm đến",
+        'start_date' : "Ngày khởi hành",
+        'search' : "Tìm chuyến",
+        'label_desc_1' : "DỄ DÀNG ĐẶT XE TRÊN WEBSITE",
+        'label_desc_11' : "Chọn thông tin hành trình và ấn Tìm chuyến",
+        'label_desc_2' : "Chọn chuyến, chỗ ngồi phù hợp và điền thông tin",
+        'label_desc_22' : "Tiến hành thanh toán online",
+        'label_desc_3' : "Nhận mã và lên xe",
+        'label_desc_33' : "Chọn chuyến, chỗ ngồi phù hợp và điền thông tin",
+    },
+    en: {
+        'start_point_head': "Departure Point",
+        'start_point': "Select boarding point",
+        'end_point_head': "Destination",
+        'end_point': "Select destination",
+        'start_date': "Departure date",
+        'search': "Find trip",
+        'label_desc_1': "EASY BOOKING ON THE WEBSITE",
+        'label_desc_11': "Select travel details and click Find Trip",
+        'label_desc_2': "Choose a trip, suitable seat, and fill in your information",
+        'label_desc_22': "Proceed to online payment",
+        'label_desc_3': "Receive code and board the vehicle",
+        'label_desc_33': "Choose a trip, suitable seat, and fill in your information",
+    },
+    
+}
+
+
 let listPointData = []
 let listPointAliasData = []
 let listPointById = {}
@@ -59,13 +92,22 @@ const getListRoute = (companyId, callback) => {
                     item.listPoint ? item.listPoint : item.listPointCache || []
                 )
                 .flat(1);
-                const uniqueListPoints = listPointData.filter(
-                (v, i, a) =>
-                    a.findIndex((v2) => v2.id === v.id) === i
-                );
-                listPointAliasData = uniqueListPoints.map((item, index) => {
+                
+                const uniqueListPoints = [];
+                const uniqueIds = [];
+                listPointData.map((item, index) => {
+                    if (!uniqueIds.includes(item.id)) {
+                        uniqueListPoints.push({
+                            ...item,
+                            index: index
+                        });
+                        uniqueIds.push(item.id);
+                        return item;
+                    }
+                })
+                listPointAliasData = uniqueListPoints.map((item) => {
                     const itemClone = { ...item };
-                    itemClone.index = index;
+                    itemClone.index = item.index;
                     itemClone.alias = fixTitle(item.name);
                     itemClone.listRoute = [item.routeId];
                     itemClone.listRouteText = itemClone.listRoute.join(',');
@@ -95,47 +137,89 @@ const getListRoute = (companyId, callback) => {
       });
 }
 
-function loadScriptsAndStyles(companyId, callback) {
-  // Tải jQuery
-  var scriptJQuery = document.createElement("script");
-  scriptJQuery.src = "https://code.jquery.com/jquery-3.6.0.min.js";
-  scriptJQuery.onload = function () {
-    // Tải Select2 sau khi jQuery đã tải xong
-    var scriptSelect2 = document.createElement("script");
-    scriptSelect2.src =
-      "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
-    scriptSelect2.onload = function () {
-        // Tải CSS cho Select2
+function loadScriptsAndStyles(companyId, callback, config) {
+    if (config.useJQuery) {
+        var scriptJQuery = document.createElement("script");
+        scriptJQuery.src = "https://code.jquery.com/jquery-3.6.0.min.js";
+        scriptJQuery.onload = function () {
+            loadSelect2AndDependencies(companyId, callback, config);
+        };
+        document.head.appendChild(scriptJQuery);
+        console.log('loadScriptsAndStyles')
+    } else {
+        loadSelect2AndDependencies(companyId, callback, config);
+    }
+}
+  
+  function loadSelect2AndDependencies(companyId, callback, config) {
+    if (config.useSelect2) {
+      var scriptSelect2 = document.createElement("script");
+      scriptSelect2.src =
+        "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
+      scriptSelect2.onload = function () {
         var linkSelect2CSS = document.createElement("link");
         linkSelect2CSS.rel = "stylesheet";
-        linkSelect2CSS.href ="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css";
-        var linkFontCSS = document.createElement("link");
-        linkFontCSS.rel = "stylesheet";
-        linkFontCSS.href ="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap&subset=vietnamese";
-        var scriptDatePicker = document.createElement("script");
-        scriptDatePicker.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js";
-        scriptDatePicker.onload = function () { 
-            var linkDatePickerCss = document.createElement("link");
-            linkDatePickerCss.rel = "stylesheet";
-            linkDatePickerCss.href = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
-            document.head.appendChild(linkSelect2CSS);
-            document.head.appendChild(linkFontCSS);
-            document.head.appendChild(linkDatePickerCss);
-            var linkPluginCSS = document.createElement("link");
-            linkPluginCSS.rel = "stylesheet";
-            linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk@v1.6/css/anvui-search.css";
-            document.head.appendChild(linkPluginCSS);
-            getListRoute(companyId, callback)
-
+        linkSelect2CSS.href =
+          "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css";
+        document.head.appendChild(linkSelect2CSS);
+        loadDatepickerAndDependencies(companyId, callback, config);
+      };
+      document.head.appendChild(scriptSelect2);
+    } else {
+      loadDatepickerAndDependencies(companyId, callback, config);
+    }
+  }
+  function loadLunarDatepicker(companyId, callback) {
+    const scriptMoment = document.createElement("script");
+    scriptMoment.src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js";
+    scriptMoment.onload = function () {
+      const scriptLunar = document.createElement("script");
+      scriptLunar.src = "https://cdn.jsdelivr.net/npm/moment-lunar@0.0.4/moment-lunar.min.js";
+        scriptLunar.onload = function () {
+            loadCustomStylesAndExecute(companyId, callback);
         }
-        document.head.appendChild(scriptDatePicker);
-        
+      document.head.appendChild(scriptLunar);
     };
-    document.head.appendChild(scriptSelect2);
-  };
-  document.head.appendChild(scriptJQuery);
-}
+    document.head.appendChild(scriptMoment);
+  }
+  
+  function loadDatepickerAndDependencies(companyId, callback, config) {
+    // Kiểm tra và tải Datepicker nếu cấu hình cho phép
+    if (config.useDatepicker) {
+      var scriptDatePicker = document.createElement("script");
+      scriptDatePicker.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js";
+      scriptDatePicker.onload = function () {
+        var linkDatePickerCss = document.createElement("link");
+        linkDatePickerCss.rel = "stylesheet";
+        linkDatePickerCss.href =
+          "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css";
+        document.head.appendChild(linkDatePickerCss);
+        loadLunarDatepicker(companyId, callback);
+      };
+      document.head.appendChild(scriptDatePicker);
+    } else {
+      loadCustomStylesAndExecute(companyId, callback);
+    }
+  }
+  
+  function loadCustomStylesAndExecute(companyId, callback) {
+    // Tải các file CSS bổ sung
+    var linkFontCSS = document.createElement("link");
+    linkFontCSS.rel = "stylesheet";
+    linkFontCSS.href =
+      "https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap&subset=vietnamese";
+    document.head.appendChild(linkFontCSS);
+  
+    var linkPluginCSS = document.createElement("link");
+    linkPluginCSS.rel = "stylesheet";
+    linkPluginCSS.href = "https://cdn.jsdelivr.net/gh/ledatk54/anvui-sdk@v1.6/css/anvui-search.css";
+    document.head.appendChild(linkPluginCSS);
+  
+    // Gọi hàm callback sau khi các tài nguyên được tải
+    getListRoute(companyId, callback);
+}  
+
 Date.prototype.getDateDDMMYYYY = function(type = 1){
 
     var yyyy = this.getFullYear().toString();                                    
@@ -291,7 +375,7 @@ class SearchTicketSDK{
         let pointDownAlias = this.listPointById[this.pointDownData]['alias']
         let pointDownIndex = this.listPointById[this.pointDownData]['index']
 
-        let url = `/dat-ve/ve-xe-tu-${pointUpAlias.trim()}-den-${pointDownAlias.trim()}-${pointUpIndex}d${pointDownIndex}.html?date=${SearchTicket.changeFormatToDateParam(this.dateData)}`
+        let url = `/dat-ve/ve-xe-tu-${pointUpAlias.trim()}-den-${pointDownAlias.trim()}-${pointUpIndex}d${pointDownIndex}.html?date=${SearchTicketSDK.changeFormatToDateParam(this.dateData)}`
         
         if(this.timeData != 0) {
             url += `&time=${this.timeData}`
@@ -314,6 +398,16 @@ class SearchTicketSDK{
             todayHighlight:true,
             orientation: 'bottom',
             autoclose: true,
+            beforeShowDay: function (date) {
+                const lunarDate = moment(date).lunar().format("DD/MM/YYYY");
+                return {
+                  tooltip: `Âm lịch: ${lunarDate}`,
+                  classes: "cell",
+                  content: `<div>${date.getDate()}</div><small 
+                  style="color: #888; font-size: 9px; position: absolute; bottom: 2px; right: 2px;"
+                  >${lunarDate.split('/')[0]}</small>`,
+                };
+            },
         });
 
         $(`${this.wrap} ${this.dateSelector}`).datepicker('setDate', today);
@@ -411,11 +505,6 @@ class SearchTicketSDK{
         return listPointDown
     }
 
-
-    // hideProvin () {
-    //     let numberPoint = $('.select2-results__option [role=group]').find('li[role=option]').length
-    //     let numberPointShow = $('.select2-results__option [role=group]').find('li[role=option][data-point-status=true]').length
-    // }
 
     initPointClickEvent()
     {
@@ -525,8 +614,8 @@ class SearchTicketSDK{
 }
 function initializePlugin() {
   var searchPluginContainer = document.getElementById(window.config.domId);
-  const pointUpSelect = ['<option value="">Chọn điểm đi</option>']
-  const pointDownSelect = ['<option value="">Chọn điểm đến</option>']
+  const pointUpSelect = [`<option value="">${LABEL_CONFIG[window.config.language]['start_point']}</option>`]
+  const pointDownSelect = [`<option value="">${LABEL_CONFIG[window.config.language]['end_point']}</option>`]
   listPointsByProvinceData.map((item) => {
     const options = [];
     item.listPoints.map((point) => {
@@ -548,8 +637,8 @@ function initializePlugin() {
                                 <span class="avicon icon-mark"></span>
                             </div>
                             <div class="searchTicket__item__right" data-select2-id="88">
-                                <span class="searchTicket__item__title">Điểm đi</span>
-                                <h3 data-point-target="pointUp">Chọn điểm lên</h3>
+                                <span class="searchTicket__item__title">${LABEL_CONFIG[window.config.language]['start_point_head']}</span>
+                                <h3 data-point-target="pointUp">${LABEL_CONFIG[window.config.language]['start_point']}</h3>
                                 <select class="pointUp select2-hidden-accessible" tabindex="-1" aria-hidden="true" style="">${pointUpSelect.join('')}</select>
                             </div>
                         </div>
@@ -558,8 +647,8 @@ function initializePlugin() {
                                 <span class="avicon icon-mark"></span>
                             </div>
                             <div class="searchTicket__item__right">
-                                <span class="searchTicket__item__title">Điểm đến</span>
-                                <h3 data-point-target="pointDown">Chọn điểm đến</h3>
+                                <span class="searchTicket__item__title">${LABEL_CONFIG[window.config.language]['end_point_head']}</span>
+                                <h3 data-point-target="pointDown">${LABEL_CONFIG[window.config.language]['end_point']}</h3>
                                 <select class="pointDown select2-hidden-accessible" tabindex="-1" aria-hidden="true" style="">${pointDownSelect.join('')}</select>
                             </div>
                         </div>
@@ -568,24 +657,24 @@ function initializePlugin() {
                                 <span class="avicon icon-calendar"></span>
                             </div>
                             <div class="searchTicket__item__right">
-                                <span class="searchTicket__item__title">Ngày khởi hành</span>
+                                <span class="searchTicket__item__title">${LABEL_CONFIG[window.config.language]['start_date']}</span>
                                 <input class="ticket-date" readonly="readOnly">
                             </div>
                         </div>
                          
                         <div class="searchTicket__search">
-                            <button data-action="searchTrip"><span class="avicon icon-search"></span>Tìm chuyến</button>
+                            <button data-action="searchTrip"><span class="avicon icon-search"></span>${LABEL_CONFIG[window.config.language]['search']}</button>
                         </div>
                     </div>
                     <div class="filterTrip__booking-step">
-                        <h3 style="text-transform: uppercase;">DỄ DÀNG ĐẶT XE TRÊN WEBSITE</h3>
+                        <h3 style="text-transform: uppercase;">${LABEL_CONFIG[window.config.language]['label_desc_1']}</h3>
                         <div class="filterTrip__booking-step__content">
                             <div class="filterTrip__booking-step__item">
                                 <span class="avicon"><svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle opacity="0.8" cx="30" cy="30" r="30" fill="#FAE8CA"></circle>
 <path d="M30 28C30.6593 28 31.3037 27.8045 31.8519 27.4382C32.4001 27.072 32.8273 26.5514 33.0796 25.9423C33.3319 25.3332 33.3979 24.663 33.2693 24.0164C33.1407 23.3698 32.8232 22.7758 32.357 22.3096C31.8908 21.8435 31.2969 21.526 30.6503 21.3974C30.0037 21.2688 29.3335 21.3348 28.7244 21.5871C28.1153 21.8394 27.5947 22.2666 27.2284 22.8148C26.8622 23.3629 26.6667 24.0074 26.6667 24.6667C26.6667 25.5507 27.0178 26.3986 27.643 27.0237C28.2681 27.6488 29.1159 28 30 28ZM28.8167 39.5167C28.9716 39.6729 29.1559 39.7969 29.359 39.8815C29.5621 39.9661 29.78 40.0097 30 40.0097C30.22 40.0097 30.4379 39.9661 30.641 39.8815C30.844 39.7969 31.0284 39.6729 31.1833 39.5167L38 32.6833C39.5832 31.1009 40.6616 29.0845 41.0988 26.8891C41.5359 24.6937 41.3121 22.418 40.4558 20.3498C39.5994 18.2816 38.149 16.5138 36.2878 15.2701C34.4267 14.0263 32.2385 13.3625 30 13.3625C27.7615 13.3625 25.5733 14.0263 23.7122 15.2701C21.851 16.5138 20.4005 18.2816 19.5442 20.3498C18.6878 22.418 18.4641 24.6937 18.9012 26.8891C19.3383 29.0845 20.4167 31.1009 22 32.6833L28.8167 39.5167ZM22.05 23.9C22.1639 22.7117 22.5417 21.5638 23.1559 20.5402C23.77 19.5166 24.6051 18.643 25.6 17.9833C26.907 17.1252 28.4364 16.6679 30 16.6679C31.5635 16.6679 33.093 17.1252 34.4 17.9833C35.3883 18.6407 36.2186 19.509 36.8312 20.5256C37.4438 21.5423 37.8236 22.682 37.9431 23.863C38.0626 25.0439 37.919 26.2366 37.5225 27.3554C37.126 28.4742 36.4865 29.4912 35.65 30.3333L30 35.9833L24.35 30.3333C23.5125 29.4994 22.8715 28.4892 22.4737 27.3763C22.0758 26.2635 21.9311 25.0759 22.05 23.9ZM41.6667 43.3333H18.3333C17.8913 43.3333 17.4674 43.5089 17.1548 43.8215C16.8423 44.134 16.6667 44.558 16.6667 45C16.6667 45.442 16.8423 45.866 17.1548 46.1785C17.4674 46.4911 17.8913 46.6667 18.3333 46.6667H41.6667C42.1087 46.6667 42.5326 46.4911 42.8452 46.1785C43.1577 45.866 43.3333 45.442 43.3333 45C43.3333 44.558 43.1577 44.134 42.8452 43.8215C42.5326 43.5089 42.1087 43.3333 41.6667 43.3333Z" fill="#FFA000"></path>
 </svg></span>
-                                <p>Chọn thông tin hành trình và ấn Tìm chuyến</p>
+                                <p>${LABEL_CONFIG[window.config.language]['label_desc_11']}</p>
                             </div>
                             <span class="avicon avicon-step icon-arrow-right-bg"></span>
                             <div class="filterTrip__booking-step__item">
@@ -597,7 +686,7 @@ function initializePlugin() {
 <path d="M37.5 38.3333C38.8807 38.3333 40 37.214 40 35.8333C40 34.4526 38.8807 33.3333 37.5 33.3333C36.1193 33.3333 35 34.4526 35 35.8333C35 37.214 36.1193 38.3333 37.5 38.3333Z" fill="#FFA000"></path>
 </svg>
 </span>
-                                                                <p>Chọn chuyến, chỗ ngồi phù hợp và điền thông tin</p>
+                                                                <p>${LABEL_CONFIG[window.config.language]['label_desc_2']}</p>
                             </div>
                             <span class="avicon avicon-step icon-arrow-right-bg"></span>
                             <div class="filterTrip__booking-step__item">
@@ -607,7 +696,7 @@ function initializePlugin() {
 <path d="M43.3333 16.6667H16.6667C14.8283 16.6667 13.3333 18.1617 13.3333 20V40C13.3333 41.8383 14.8283 43.3333 16.6667 43.3333H43.3333C45.1717 43.3333 46.6667 41.8383 46.6667 40V20C46.6667 18.1617 45.1717 16.6667 43.3333 16.6667ZM16.6667 20H43.3333V23.3333H16.6667V20ZM16.6667 40V30H43.335L43.3367 40H16.6667Z" fill="#FFA000"></path>
 <path d="M20 33.3333H30V36.6667H20V33.3333Z" fill="#FFA000"></path>
 </svg></span>
-                                <p>Tiến hành thanh toán online</p>
+                                <p>${LABEL_CONFIG[window.config.language]['label_desc_22']}</p>
                             </div>
                             <span class="avicon avicon-step icon-arrow-right-bg"></span>
                             <div class="filterTrip__booking-step__item">
@@ -615,7 +704,7 @@ function initializePlugin() {
 <circle cx="30" cy="30" r="30" fill="#FAE8CA"></circle>
 <path d="M25 26.6667C24.558 26.6667 24.1341 26.8423 23.8215 27.1548C23.5089 27.4674 23.3333 27.8913 23.3333 28.3333V31.6667C23.3333 32.1087 23.5089 32.5326 23.8215 32.8452C24.1341 33.1577 24.558 33.3333 25 33.3333C25.442 33.3333 25.866 33.1577 26.1785 32.8452C26.4911 32.5326 26.6667 32.1087 26.6667 31.6667V28.3333C26.6667 27.8913 26.4911 27.4674 26.1785 27.1548C25.866 26.8423 25.442 26.6667 25 26.6667ZM45 28.3333C45.442 28.3333 45.866 28.1577 46.1785 27.8452C46.4911 27.5326 46.6667 27.1087 46.6667 26.6667V20C46.6667 19.558 46.4911 19.1341 46.1785 18.8215C45.866 18.5089 45.442 18.3333 45 18.3333H15C14.558 18.3333 14.1341 18.5089 13.8215 18.8215C13.5089 19.1341 13.3333 19.558 13.3333 20V26.6667C13.3333 27.1087 13.5089 27.5326 13.8215 27.8452C14.1341 28.1577 14.558 28.3333 15 28.3333C15.442 28.3333 15.866 28.5089 16.1785 28.8215C16.4911 29.1341 16.6667 29.558 16.6667 30C16.6667 30.442 16.4911 30.866 16.1785 31.1785C15.866 31.4911 15.442 31.6667 15 31.6667C14.558 31.6667 14.1341 31.8423 13.8215 32.1548C13.5089 32.4674 13.3333 32.8913 13.3333 33.3333V40C13.3333 40.442 13.5089 40.866 13.8215 41.1785C14.1341 41.4911 14.558 41.6667 15 41.6667H45C45.442 41.6667 45.866 41.4911 46.1785 41.1785C46.4911 40.866 46.6667 40.442 46.6667 40V33.3333C46.6667 32.8913 46.4911 32.4674 46.1785 32.1548C45.866 31.8423 45.442 31.6667 45 31.6667C44.558 31.6667 44.1341 31.4911 43.8215 31.1785C43.5089 30.866 43.3333 30.442 43.3333 30C43.3333 29.558 43.5089 29.1341 43.8215 28.8215C44.1341 28.5089 44.558 28.3333 45 28.3333ZM43.3333 25.3C42.3681 25.6503 41.5341 26.2894 40.9447 27.1303C40.3554 27.9712 40.0392 28.9731 40.0392 30C40.0392 31.0269 40.3554 32.0288 40.9447 32.8697C41.5341 33.7106 42.3681 34.3497 43.3333 34.7V38.3333H26.6667C26.6667 37.8913 26.4911 37.4674 26.1785 37.1548C25.866 36.8423 25.442 36.6667 25 36.6667C24.558 36.6667 24.1341 36.8423 23.8215 37.1548C23.5089 37.4674 23.3333 37.8913 23.3333 38.3333H16.6667V34.7C17.6319 34.3497 18.4659 33.7106 19.0553 32.8697C19.6446 32.0288 19.9608 31.0269 19.9608 30C19.9608 28.9731 19.6446 27.9712 19.0553 27.1303C18.4659 26.2894 17.6319 25.6503 16.6667 25.3V21.6667H23.3333C23.3333 22.1087 23.5089 22.5326 23.8215 22.8452C24.1341 23.1577 24.558 23.3333 25 23.3333C25.442 23.3333 25.866 23.1577 26.1785 22.8452C26.4911 22.5326 26.6667 22.1087 26.6667 21.6667H43.3333V25.3Z" fill="#FFA000"></path>
 </svg></span>
-                                <p>Nhận mã và lên xe</p>
+                                <p>${LABEL_CONFIG[window.config.language]['label_desc_3']}</p>
                             </div>
                         </div>
 
@@ -647,7 +736,7 @@ function initializePlugin() {
 <path d="M25 26.6667C24.558 26.6667 24.1341 26.8423 23.8215 27.1548C23.5089 27.4674 23.3333 27.8913 23.3333 28.3333V31.6667C23.3333 32.1087 23.5089 32.5326 23.8215 32.8452C24.1341 33.1577 24.558 33.3333 25 33.3333C25.442 33.3333 25.866 33.1577 26.1785 32.8452C26.4911 32.5326 26.6667 32.1087 26.6667 31.6667V28.3333C26.6667 27.8913 26.4911 27.4674 26.1785 27.1548C25.866 26.8423 25.442 26.6667 25 26.6667ZM45 28.3333C45.442 28.3333 45.866 28.1577 46.1785 27.8452C46.4911 27.5326 46.6667 27.1087 46.6667 26.6667V20C46.6667 19.558 46.4911 19.1341 46.1785 18.8215C45.866 18.5089 45.442 18.3333 45 18.3333H15C14.558 18.3333 14.1341 18.5089 13.8215 18.8215C13.5089 19.1341 13.3333 19.558 13.3333 20V26.6667C13.3333 27.1087 13.5089 27.5326 13.8215 27.8452C14.1341 28.1577 14.558 28.3333 15 28.3333C15.442 28.3333 15.866 28.5089 16.1785 28.8215C16.4911 29.1341 16.6667 29.558 16.6667 30C16.6667 30.442 16.4911 30.866 16.1785 31.1785C15.866 31.4911 15.442 31.6667 15 31.6667C14.558 31.6667 14.1341 31.8423 13.8215 32.1548C13.5089 32.4674 13.3333 32.8913 13.3333 33.3333V40C13.3333 40.442 13.5089 40.866 13.8215 41.1785C14.1341 41.4911 14.558 41.6667 15 41.6667H45C45.442 41.6667 45.866 41.4911 46.1785 41.1785C46.4911 40.866 46.6667 40.442 46.6667 40V33.3333C46.6667 32.8913 46.4911 32.4674 46.1785 32.1548C45.866 31.8423 45.442 31.6667 45 31.6667C44.558 31.6667 44.1341 31.4911 43.8215 31.1785C43.5089 30.866 43.3333 30.442 43.3333 30C43.3333 29.558 43.5089 29.1341 43.8215 28.8215C44.1341 28.5089 44.558 28.3333 45 28.3333ZM43.3333 25.3C42.3681 25.6503 41.5341 26.2894 40.9447 27.1303C40.3554 27.9712 40.0392 28.9731 40.0392 30C40.0392 31.0269 40.3554 32.0288 40.9447 32.8697C41.5341 33.7106 42.3681 34.3497 43.3333 34.7V38.3333H26.6667C26.6667 37.8913 26.4911 37.4674 26.1785 37.1548C25.866 36.8423 25.442 36.6667 25 36.6667C24.558 36.6667 24.1341 36.8423 23.8215 37.1548C23.5089 37.4674 23.3333 37.8913 23.3333 38.3333H16.6667V34.7C17.6319 34.3497 18.4659 33.7106 19.0553 32.8697C19.6446 32.0288 19.9608 31.0269 19.9608 30C19.9608 28.9731 19.6446 27.9712 19.0553 27.1303C18.4659 26.2894 17.6319 25.6503 16.6667 25.3V21.6667H23.3333C23.3333 22.1087 23.5089 22.5326 23.8215 22.8452C24.1341 23.1577 24.558 23.3333 25 23.3333C25.442 23.3333 25.866 23.1577 26.1785 22.8452C26.4911 22.5326 26.6667 22.1087 26.6667 21.6667H43.3333V25.3Z" fill="#FFA000"></path>
 </svg></span>
                             </div>
-                            <p>Chọn chuyến, chỗ ngồi phù hợp và điền thông tin</p>
+                            <p>${LABEL_CONFIG[window.config.language]['label_desc_33']}</p>
                         </div>
                     </div>
                 </div>
@@ -683,7 +772,8 @@ function initializePlugin() {
 function init(config) {
   window.webUrl = config.url;
   window.config = config;
-  loadScriptsAndStyles(config.companyId, initializePlugin);
+  loadScriptsAndStyles(config.companyId, initializePlugin, config);
+  
 }
 
 // Export hàm init
