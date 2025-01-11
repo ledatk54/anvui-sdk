@@ -706,7 +706,10 @@ button, input, optgroup, select, textarea {
 .filterTrip__booking-step .avicon-step {
     margin-top: 10px;
 }
-
+.avicon__step{
+    width: 60px;
+    height: 60px;
+}
 .icon-arrow-right-bg {
     background-image: url(../imgs/sprites_generated/sprite.png);
     background-position: -360px -64px;
