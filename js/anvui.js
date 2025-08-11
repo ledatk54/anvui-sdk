@@ -131,7 +131,8 @@ const getListRoute = (companyId, callback) => {
             }
             
         },
-        error: function () {
+        error: function (e) {
+            console.error("Error fetching routes:", e);
           console.log('error')
         },
       });
